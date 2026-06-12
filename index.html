@@ -172,6 +172,60 @@
 
     /* TEAM CREST */
     .team-crest{width:22px;height:22px;object-fit:contain;display:block;margin:0 auto 3px;}
+
+    /* LIVE TIMER */
+    .live-timer{background:var(--red);color:#fff;font-size:.7rem;font-weight:700;
+      padding:3px 8px;border-radius:4px;min-width:38px;text-align:center;
+      animation:pulse 1.5s infinite;display:inline-block;}
+
+    /* GOAL SCORERS */
+    .goal-scorers{font-size:.7rem;color:var(--muted);margin-top:5px;
+      display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    .goal-event{color:var(--yellow);}
+
+    /* MATCH CARD EXPANDED */
+    .match-card{flex-wrap:wrap;}
+    .match-card .card-bottom{width:100%;border-top:1px solid var(--border);
+      margin-top:8px;padding-top:8px;display:flex;align-items:center;
+      justify-content:space-between;gap:8px;}
+    .commentary-toggle{background:none;border:1px solid var(--border);color:var(--muted);
+      font-size:.68rem;padding:3px 10px;border-radius:4px;cursor:pointer;transition:all .2s;}
+    .commentary-toggle:hover{border-color:var(--green);color:var(--green);}
+
+    /* COMMENTARY PANEL */
+    .commentary-panel{display:none;width:100%;background:#0a150b;border-radius:8px;
+      margin-top:8px;padding:10px 14px;max-height:200px;overflow-y:auto;}
+    .commentary-panel.open{display:block;}
+    .commentary-panel::-webkit-scrollbar{width:4px;}
+    .commentary-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+    .comm-row{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid #0f1f11;font-size:.75rem;}
+    .comm-row:last-child{border-bottom:none;}
+    .comm-min{color:var(--green);font-weight:700;min-width:30px;}
+    .comm-txt{color:var(--text);line-height:1.4;}
+    .comm-goal{color:var(--yellow);}
+    .comm-empty{color:var(--muted);text-align:center;padding:10px;font-size:.78rem;}
+
+    /* PUSH NOTIFICATION TOAST */
+    #notif-toast{position:fixed;bottom:24px;right:24px;z-index:9999;
+      background:#0d1f10;border:1px solid var(--green);border-radius:10px;
+      padding:14px 18px;max-width:300px;box-shadow:0 8px 30px rgba(0,0,0,.5);
+      transform:translateY(120px);opacity:0;transition:all .4s ease;pointer-events:none;}
+    #notif-toast.show{transform:translateY(0);opacity:1;pointer-events:auto;}
+    .toast-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    .toast-icon{font-size:1.3rem;}
+    .toast-title{font-weight:700;color:var(--green);font-size:.85rem;}
+    .toast-close{margin-left:auto;background:none;border:none;color:var(--muted);
+      cursor:pointer;font-size:1rem;line-height:1;}
+    .toast-body{font-size:.82rem;color:var(--text);line-height:1.4;}
+    .toast-score{font-size:1.1rem;font-weight:700;color:#fff;margin-top:4px;}
+
+    /* NOTIF PERMISSION BTN */
+    #notif-btn{position:fixed;bottom:24px;left:24px;z-index:9999;
+      background:var(--green);color:#000;font-weight:700;font-size:.78rem;
+      padding:10px 16px;border-radius:8px;border:none;cursor:pointer;
+      display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,200,83,.3);}
+    #notif-btn:hover{opacity:.9;}
+    #notif-btn.hidden{display:none;}
   </style>
 </head>
 <body>
@@ -377,6 +431,22 @@
   </div>
 </div>
 
+<!-- PUSH NOTIFICATION TOAST -->
+<div id="notif-toast">
+  <div class="toast-header">
+    <span class="toast-icon">⚽</span>
+    <span class="toast-title" id="toast-title">GOAL!</span>
+    <button class="toast-close" onclick="document.getElementById('notif-toast').classList.remove('show')">✕</button>
+  </div>
+  <div class="toast-body" id="toast-body"></div>
+  <div class="toast-score" id="toast-score"></div>
+</div>
+
+<!-- NOTIFICATION PERMISSION BUTTON -->
+<button id="notif-btn" onclick="requestNotifPermission()">
+  🔔 Goal Alerts চালু করো
+</button>
+
 <footer>
   <div class="f-logo">GoalBD</div>
   <p>The #1 Free Live Football Streaming Site — Real-time Data</p>
@@ -437,7 +507,11 @@ function isToday(utcStr) {
 
 function statusInfo(match) {
   const s = match.status;
-  if (s === 'IN_PLAY' || s === 'PAUSED') return { label: '🔴 LIVE', cls: 'live-now', dotCls: 'live', btnTxt: '▶ Watch', btnCls: 'watch-btn' };
+  const min = match.minute || match.score?.duration || null;
+  if (s === 'IN_PLAY' || s === 'PAUSED') {
+    const minStr = min ? `${min}'` : 'LIVE';
+    return { label: `<span class="live-timer">${minStr}</span>`, cls: 'live-now', dotCls: 'live', btnTxt: '▶ Watch', btnCls: 'watch-btn' };
+  }
   if (s === 'FINISHED') return { label: '✅ FT', cls: 'finished', dotCls: '', btnTxt: 'FT', btnCls: 'watch-btn fin-btn' };
   if (s === 'TIMED' || s === 'SCHEDULED') return { label: formatTime(match.utcDate), cls: '', dotCls: 'upcoming', btnTxt: 'Soon', btnCls: 'watch-btn soon-btn' };
   return { label: s, cls: '', dotCls: '', btnTxt: 'Soon', btnCls: 'watch-btn soon-btn' };
@@ -455,18 +529,31 @@ function compInfo(code) {
   return COMPETITIONS.find(c => c.code === code) || { emoji: '⚽', name: code };
 }
 
+function getGoalScorers(match) {
+  const goals = match.goals || [];
+  if (!goals.length) return '';
+  const homeGoals = goals.filter(g => g.team?.id === match.homeTeam?.id);
+  const awayGoals = goals.filter(g => g.team?.id === match.awayTeam?.id);
+  let parts = [];
+  if (homeGoals.length) parts.push(`<span class="goal-event">⚽ ${homeGoals.map(g=>`${g.scorer?.name||'?'} ${g.minute?g.minute+"'":''}`).join(', ')}</span>`);
+  if (awayGoals.length) parts.push(`<span class="goal-event" style="margin-left:auto;">⚽ ${awayGoals.map(g=>`${g.scorer?.name||'?'} ${g.minute?g.minute+"'":''}`).join(', ')}</span>`);
+  return parts.length ? `<div class="goal-scorers">${parts.join('<span style="color:var(--border)">|</span>')}</div>` : '';
+}
+
 function renderCard(match) {
   const comp = compInfo(match.competition?.code);
   const info = statusInfo(match);
   const score = scoreStr(match);
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED';
   const scoreClass = (match.status !== 'TIMED' && match.status !== 'SCHEDULED') ? 'score' : '';
-
   const homeFlag = match.homeTeam?.flag || '';
   const awayFlag = match.awayTeam?.flag || '';
+  const matchId = match.id || Math.random().toString(36).slice(2);
+  const scorers = getGoalScorers(match);
+  const hasComm = isLive || match.status === 'FINISHED';
 
   return `
-  <a class="match-card ${info.cls}" href="${isLive ? WATCH_URL : (match.status==='TIMED'?'#':WATCH_URL)}" data-code="${match.competition?.code||'all'}">
+  <div class="match-card ${info.cls}" data-code="${match.competition?.code||'all'}" data-id="${matchId}">
     <div class="match-league">${comp.emoji} ${comp.name}</div>
     <div class="match-teams">
       <div class="team-name">
@@ -480,8 +567,56 @@ function renderCard(match) {
       </div>
     </div>
     <div class="match-time-col">${info.label}</div>
-    <span class="${info.btnCls}">${info.btnTxt}</span>
-  </a>`;
+    <a class="watch-btn ${info.btnCls}" href="${isLive ? WATCH_URL : (match.status==='TIMED'?'#':WATCH_URL)}">${info.btnTxt}</a>
+    ${scorers ? `<div class="card-bottom" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;width:100%;">${scorers}</div>` : ''}
+    ${hasComm ? `
+    <div class="card-bottom">
+      <button class="commentary-toggle" onclick="toggleComm('${matchId}', this)">📝 Live Commentary</button>
+      <span style="font-size:.7rem;color:var(--muted);">click to expand</span>
+    </div>
+    <div class="commentary-panel" id="comm-${matchId}">
+      ${renderCommentary(match)}
+    </div>` : ''}
+  </div>`;
+}
+
+function renderCommentary(match) {
+  const events = match.goals || [];
+  const bookings = match.bookings || [];
+  const subs = match.substitutions || [];
+
+  // Merge all events
+  let allEvents = [
+    ...events.map(g => ({ min: g.minute||0, type:'goal', text:`⚽ GOAL! ${g.scorer?.name||'?'} (${g.team?.shortName||'?'}) — ${g.minute||'?'}'` })),
+    ...bookings.map(b => ({ min: b.minute||0, type:'book', text:`🟨 ${b.player?.name||'?'} — Yellow Card ${b.minute||'?'}'` })),
+    ...subs.map(s => ({ min: s.minute||0, type:'sub', text:`🔄 ${s.playerOut?.name||'?'} ➜ ${s.playerIn?.name||'?'} ${s.minute||'?'}'` })),
+  ].sort((a,b) => b.min - a.min);
+
+  // Demo commentary for live matches when no real events
+  if (!allEvents.length && (match.status === 'IN_PLAY' || match.status === 'PAUSED')) {
+    allEvents = [
+      { min:45, text:'⏱ Half time whistle blown.' },
+      { min:38, text:'🔥 Corner kick for the home side.' },
+      { min:22, text:'💨 Fast counter-attack down the left wing.' },
+      { min:10, text:'📢 Match underway! Kick-off.' },
+    ];
+  }
+
+  if (!allEvents.length) return `<div class="comm-empty">No events recorded yet.</div>`;
+
+  return allEvents.map(e =>
+    `<div class="comm-row ${e.type==='goal'?'comm-goal':''}">
+      <span class="comm-min">${e.min}'</span>
+      <span class="comm-txt">${e.text}</span>
+    </div>`
+  ).join('');
+}
+
+function toggleComm(id, btn) {
+  const panel = document.getElementById('comm-'+id);
+  if (!panel) return;
+  panel.classList.toggle('open');
+  btn.textContent = panel.classList.contains('open') ? '📝 Commentary ▲' : '📝 Live Commentary';
 }
 
 function renderSkeletons(n=4) {
@@ -532,6 +667,7 @@ async function fetchMatches() {
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     allMatches = data.matches || [];
+    checkGoalAlerts(allMatches);
     renderAll();
   } catch(e) {
     console.error('API error', e);
@@ -646,6 +782,70 @@ document.querySelectorAll('.league-chip').forEach(chip => {
     chip.classList.add('active');
     renderAll();
   });
+});
+
+// ============================================================
+// PUSH NOTIFICATION + GOAL ALERT SYSTEM
+// ============================================================
+let notifPermission = Notification?.permission || 'default';
+let prevScores = {};
+
+function requestNotifPermission() {
+  if (!('Notification' in window)) {
+    alert('এই browser-এ notification support নেই।');
+    return;
+  }
+  Notification.requestPermission().then(p => {
+    notifPermission = p;
+    if (p === 'granted') {
+      document.getElementById('notif-btn').classList.add('hidden');
+      showToast('✅ চালু হয়েছে!', 'Goal হলে notification পাবে!', '');
+    }
+  });
+}
+
+function checkGoalAlerts(matches) {
+  matches.forEach(m => {
+    if (m.status !== 'IN_PLAY' && m.status !== 'PAUSED') return;
+    const id = m.id;
+    const h = m.score?.fullTime?.home ?? 0;
+    const a = m.score?.fullTime?.away ?? 0;
+    const key = `${h}-${a}`;
+    if (prevScores[id] && prevScores[id] !== key) {
+      const home = m.homeTeam?.shortName || '?';
+      const away = m.awayTeam?.shortName || '?';
+      triggerGoalAlert(home, away, h, a);
+    }
+    prevScores[id] = key;
+  });
+}
+
+function triggerGoalAlert(home, away, h, a) {
+  // In-page toast
+  showToast('⚽ GOAL!', `${home} vs ${away}`, `${h} – ${a}`);
+  // Browser notification
+  if (notifPermission === 'granted') {
+    new Notification('⚽ GOAL! — GoalBD', {
+      body: `${home} ${h} – ${a} ${away}`,
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Brazilian_Football_Confederation_logo.svg/100px-Brazilian_Football_Confederation_logo.svg.png'
+    });
+  }
+}
+
+function showToast(title, body, score) {
+  const t = document.getElementById('notif-toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-body').textContent = body;
+  document.getElementById('toast-score').textContent = score;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+// Show/hide notification button based on permission
+window.addEventListener('load', () => {
+  if (!('Notification' in window) || Notification.permission === 'granted') {
+    document.getElementById('notif-btn').classList.add('hidden');
+  }
 });
 
 // ============================================================
