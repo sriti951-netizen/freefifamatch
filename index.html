@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GoalBD – Free HD Live Football Streams</title>
+  <meta name="description" content="Watch FIFA World Cup, Premier League, La Liga, Champions League live for free. Real-time match schedule updated automatically."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green:#00C853;--dark:#0a0f0d;--card:#111a14;--border:#1e2e20;
+      --text:#e8f5e9;--muted:#7a9b7e;--red:#ff3b30;--yellow:#ffd600;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;
+      background:#050a06;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green);letter-spacing:2px;}
+    .logo span{color:#fff;}
+    nav ul{display:flex;gap:20px;list-style:none;}
+    nav ul a{color:var(--muted);text-decoration:none;font-size:.85rem;font-weight:600;
+      text-transform:uppercase;letter-spacing:1px;transition:color .2s;}
+    nav ul a:hover{color:var(--green);}
+    .live-badge{background:var(--red);color:#fff;font-size:.7rem;font-weight:700;
+      padding:3px 8px;border-radius:4px;animation:pulse 1.5s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    @media(max-width:768px){nav ul{display:none;}}
+
+    /* AD SLOTS */
+    .ad-slot{display:flex;justify-content:center;align-items:center;padding:10px;
+      background:#111a14;border-bottom:1px solid var(--border);min-height:90px;}
+    .ad-box{background:#1a2a1c;border:1px dashed #2a3d2c;border-radius:6px;
+      color:var(--muted);font-size:.75rem;display:flex;align-items:center;
+      justify-content:center;text-align:center;padding:10px;}
+
+    /* HERO */
+    .hero{background:linear-gradient(135deg,#050a06 0%,#0d1f10 60%,#071408 100%);
+      padding:56px 24px 44px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);
+      width:400px;height:400px;background:radial-gradient(circle,rgba(0,200,83,.08) 0%,transparent 70%);pointer-events:none;}
+    .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.6rem,7vw,5rem);line-height:1;letter-spacing:3px;}
+    .hero h1 span{color:var(--green);}
+    .hero p{color:var(--muted);margin:14px auto 26px;max-width:520px;font-size:1rem;line-height:1.6;}
+    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    .btn-primary{background:var(--green);color:#000;font-weight:700;padding:13px 28px;
+      border-radius:6px;text-decoration:none;font-size:.9rem;transition:transform .15s,box-shadow .15s;}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,200,83,.35);}
+    .btn-outline{border:1px solid var(--border);color:var(--text);padding:13px 28px;
+      border-radius:6px;text-decoration:none;font-size:.9rem;transition:border-color .2s;}
+    .btn-outline:hover{border-color:var(--green);color:var(--green);}
+
+    /* STATS */
+    .stats-row{display:flex;gap:12px;max-width:1100px;margin:24px auto 0;padding:0 20px;}
+    .stat-box{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;}
+    .stat-box .num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green);line-height:1;}
+    .stat-box .lbl{font-size:.72rem;color:var(--muted);margin-top:4px;font-weight:600;text-transform:uppercase;}
+    @media(max-width:480px){.stats-row{display:grid;grid-template-columns:1fr 1fr;}}
+
+    /* LEAGUES STRIP */
+    .leagues-strip{display:flex;gap:10px;overflow-x:auto;padding:14px 20px;
+      background:#050a06;border-bottom:1px solid var(--border);scrollbar-width:none;}
+    .leagues-strip::-webkit-scrollbar{display:none;}
+    .league-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;
+      padding:7px 16px;font-size:.8rem;font-weight:600;white-space:nowrap;cursor:pointer;
+      transition:all .2s;color:var(--muted);}
+    .league-chip:hover,.league-chip.active{background:var(--green);color:#000;border-color:var(--green);}
+
+    /* MAIN GRID */
+    .main-grid{display:grid;grid-template-columns:1fr 300px;gap:24px;
+      padding:28px 20px;max-width:1100px;margin:0 auto;}
+    @media(max-width:900px){.main-grid{grid-template-columns:1fr;}}
+
+    /* SECTION TITLE */
+    .section-title{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+    .section-title h2{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;
+      letter-spacing:2px;color:#fff;white-space:nowrap;}
+    .line{flex:1;height:1px;background:var(--border);}
+
+    /* MATCH CARD */
+    .match-card{background:var(--card);border:1px solid var(--border);border-radius:10px;
+      padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;
+      transition:border-color .2s,transform .15s;text-decoration:none;color:inherit;}
+    .match-card:hover{border-color:var(--green);transform:translateX(3px);}
+    .match-card.live-now{border-left:3px solid var(--red);}
+    .match-card.finished{opacity:.7;}
+    .match-league{font-size:.68rem;color:var(--muted);font-weight:600;
+      text-transform:uppercase;letter-spacing:.8px;min-width:80px;}
+    .match-teams{flex:1;display:flex;align-items:center;gap:10px;justify-content:center;}
+    .team-name{font-weight:700;font-size:.9rem;text-align:center;min-width:80px;line-height:1.3;}
+    .vs-box{background:#1e2e20;border-radius:6px;padding:5px 10px;
+      font-weight:700;font-size:.9rem;color:var(--green);min-width:50px;text-align:center;}
+    .vs-box.score{color:#fff;font-size:1rem;}
+    .match-time-col{font-size:.78rem;color:var(--muted);text-align:right;min-width:65px;}
+    .watch-btn{background:var(--green);color:#000;font-weight:700;font-size:.72rem;
+      padding:7px 13px;border-radius:5px;text-decoration:none;white-space:nowrap;transition:opacity .2s;}
+    .watch-btn:hover{opacity:.85;}
+    .watch-btn.soon-btn{background:#1e2e20;color:var(--muted);}
+    .watch-btn.fin-btn{background:#1e2e20;color:var(--muted);pointer-events:none;}
+
+    /* STATUS BADGE */
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+    .status-dot.live{background:var(--red);animation:pulse 1s infinite;}
+    .status-dot.upcoming{background:var(--yellow);}
+
+    /* SKELETON LOADER */
+    .skeleton{background:linear-gradient(90deg,var(--card) 25%,#1a2a1c 50%,var(--card) 75%);
+      background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:10px;
+      height:68px;margin-bottom:10px;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* ERROR */
+    .api-error{background:#1a1010;border:1px solid #3d1e1e;border-radius:10px;
+      padding:20px;text-align:center;color:#e57373;font-size:.85rem;margin-bottom:12px;}
+    .api-error a{color:var(--green);text-decoration:none;}
+
+    /* SETUP BANNER */
+    .setup-banner{background:linear-gradient(135deg,#0d1f10,#152a17);
+      border:1px solid var(--green);border-radius:10px;padding:18px 20px;
+      margin-bottom:20px;display:flex;align-items:flex-start;gap:14px;}
+    .setup-banner .icon{font-size:1.8rem;flex-shrink:0;}
+    .setup-banner h3{font-size:.95rem;font-weight:700;color:var(--green);margin-bottom:6px;}
+    .setup-banner p{font-size:.8rem;color:var(--muted);line-height:1.5;}
+    .setup-banner code{background:#1e2e20;padding:2px 6px;border-radius:4px;
+      font-size:.78rem;color:var(--yellow);}
+
+    /* TABS */
+    .tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px;}
+    .tab{padding:7px 16px;border-radius:5px;font-size:.82rem;font-weight:600;cursor:pointer;
+      color:var(--muted);transition:all .2s;background:none;border:1px solid transparent;}
+    .tab.active{background:var(--green);color:#000;border-color:var(--green);}
+    .tab:hover:not(.active){border-color:var(--border);color:var(--text);}
+
+    /* SIDEBAR */
+    .sidebar-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:20px;}
+    .sidebar-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1.5px;
+      color:var(--green);margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:8px;}
+    .standing-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+    .standing-table th{color:var(--muted);text-align:left;padding:5px 4px;font-weight:600;font-size:.7rem;text-transform:uppercase;}
+    .standing-table td{padding:7px 4px;border-top:1px solid var(--border);}
+    .standing-table tr:hover td{background:#152016;}
+    .pos{color:var(--muted);width:20px;}
+    .team-n{font-weight:600;}
+    .pts{color:var(--green);font-weight:700;}
+
+    /* NEWS */
+    .news-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit;}
+    .news-item:last-child{border-bottom:none;}
+    .news-item:hover .news-hl{color:var(--green);}
+    .news-img{width:60px;height:50px;border-radius:5px;background:#1e2e20;flex-shrink:0;object-fit:cover;}
+    .news-hl{font-size:.82rem;font-weight:600;line-height:1.4;transition:color .2s;}
+    .news-meta{font-size:.7rem;color:var(--muted);margin-top:4px;}
+
+    .ad-sidebar{background:#111a14;border:1px dashed #2a3d2c;border-radius:8px;
+      min-height:250px;display:flex;align-items:center;justify-content:center;
+      color:var(--muted);font-size:.75rem;text-align:center;padding:10px;margin-bottom:20px;}
+
+    footer{background:#050a06;border-top:1px solid var(--border);padding:28px 20px;
+      text-align:center;color:var(--muted);font-size:.8rem;}
+    footer .f-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--green);margin-bottom:8px;}
+    footer a{color:var(--muted);text-decoration:none;margin:0 8px;}
+    footer a:hover{color:var(--green);}
+
+    /* MATCH COUNT BADGE */
+    .count-badge{background:var(--green);color:#000;font-size:.65rem;font-weight:700;
+      padding:2px 7px;border-radius:10px;margin-left:6px;}
+
+    /* COMPETITION LOGO */
+    .comp-logo{width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:4px;}
+
+    /* TEAM CREST */
+    .team-crest{width:22px;height:22px;object-fit:contain;display:block;margin:0 auto 3px;}
+  </style>
+</head>
+<body>
+
+<!-- ✅ ADSTERRA POPUNDER — paste script here -->
+<!-- <script>// Adsterra Popunder code here</script> -->
+
+<nav>
+  <div class="logo">Goal<span>BD</span></div>
+  <ul>
+    <li><a href="#live">Live</a> <span class="live-badge">LIVE</span></li>
+    <li><a href="#schedule">Schedule</a></li>
+    <li><a href="#leagues">Leagues</a></li>
+    <li><a href="#news">News</a></li>
+  </ul>
+</nav>
+
+<!-- ✅ ADSTERRA TOP BANNER 728x90 -->
+<div class="ad-slot">
+  <div class="ad-box" style="width:728px;max-width:100%;height:90px;">
+    <!-- ✅ Paste Adsterra 728×90 Top Banner code here -->
+    📢 Adsterra Top Banner 728×90
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Free <span>Live Football</span><br>Streams</h1>
+  <p>Real-time FIFA World Cup 2026, Premier League, La Liga & Champions League — free, no sign-up needed.</p>
+  <div class="hero-btns">
+    <a href="#live" class="btn-primary">🔴 Watch Live Now</a>
+    <a href="#schedule" class="btn-outline">📅 Full Schedule</a>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-box"><div class="num">48</div><div class="lbl">Teams</div></div>
+  <div class="stat-box"><div class="num" id="live-count">—</div><div class="lbl">Live Now</div></div>
+  <div class="stat-box"><div class="num" id="today-count">—</div><div class="lbl">Today</div></div>
+  <div class="stat-box"><div class="num">Free</div><div class="lbl">Always</div></div>
+</div>
+
+<div class="leagues-strip" id="leagues">
+  <div class="league-chip active" data-code="all">🌍 All</div>
+  <div class="league-chip" data-code="WC">🏆 World Cup</div>
+  <div class="league-chip" data-code="PL">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</div>
+  <div class="league-chip" data-code="PD">🇪🇸 La Liga</div>
+  <div class="league-chip" data-code="BL1">🇩🇪 Bundesliga</div>
+  <div class="league-chip" data-code="SA">🇮🇹 Serie A</div>
+  <div class="league-chip" data-code="FL1">🇫🇷 Ligue 1</div>
+  <div class="league-chip" data-code="CL">⭐ Champions League</div>
+</div>
+
+<div class="main-grid">
+  <div>
+
+    <!-- API SETUP NOTICE (shown until API key is added) -->
+    <div class="setup-banner" id="setup-notice" style="display:none;">
+      <div class="icon">🔑</div>
+      <div>
+        <h3>One-time Setup: Add Your Free API Key</h3>
+        <p>
+          Real match data comes from <strong>football-data.org</strong> (100% free).<br>
+          1. Go to <strong>football-data.org/client/register</strong> → register free<br>
+          2. Copy your API key from the email<br>
+          3. Open <code>index.html</code> → find <code>YOUR_API_KEY_HERE</code> → paste your key<br>
+          4. Save & re-upload to Netlify → live data appears automatically ✅
+        </p>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" data-tab="live">🔴 Live <span class="count-badge" id="live-tab-count">0</span></button>
+      <button class="tab" data-tab="today">📅 Today <span class="count-badge" id="today-tab-count">0</span></button>
+      <button class="tab" data-tab="upcoming">🗓 Upcoming</button>
+      <button class="tab" data-tab="finished">✅ Results</button>
+    </div>
+
+    <!-- MATCH CONTAINERS -->
+    <div id="matches-live"></div>
+    <div id="matches-today" style="display:none;"></div>
+    <div id="matches-upcoming" style="display:none;"></div>
+    <div id="matches-finished" style="display:none;"></div>
+
+    <!-- MID AD -->
+    <div style="margin:20px 0;display:flex;justify-content:center;">
+      <div class="ad-box" style="width:100%;max-width:728px;height:90px;">
+        <!-- ✅ Adsterra Middle Banner 728×90 -->
+        📢 Adsterra Banner Ad — Middle
+      </div>
+    </div>
+
+    <!-- NEWS -->
+    <div id="news" style="margin-top:10px;">
+      <div class="section-title"><h2>📰 Latest News</h2><div class="line"></div></div>
+      <a class="news-item" href="#">
+        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c1/Argentina_national_football_team_logo.svg/100px-Argentina_national_football_team_logo.svg.png" alt="">
+        <div><div class="news-hl">Messi signals this could be his final World Cup — Argentina eye back-to-back glory</div><div class="news-meta">⏱ 2h ago · FIFA World Cup 2026</div></div>
+      </a>
+      <a class="news-item" href="#">
+        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/England_national_football_team_crest.svg/100px-England_national_football_team_crest.svg.png" alt="">
+        <div><div class="news-hl">England vs France: Tension builds ahead of the World Cup quarter-final showdown</div><div class="news-meta">⏱ 4h ago · FIFA World Cup 2026</div></div>
+      </a>
+      <a class="news-item" href="#">
+        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/3/39/Spain_national_football_team_crest.svg/100px-Spain_national_football_team_crest.svg.png" alt="">
+        <div><div class="news-hl">Spain dominant in group stage — are they the real favorites for the title?</div><div class="news-meta">⏱ 6h ago · La Liga</div></div>
+      </a>
+      <a class="news-item" href="#">
+        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Brazilian_Football_Confederation_logo.svg/100px-Brazilian_Football_Confederation_logo.svg.png" alt="">
+        <div><div class="news-hl">Brazil's Vinicius Jr in blistering form — samba football is back at the World Cup</div><div class="news-meta">⏱ 8h ago · FIFA World Cup 2026</div></div>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div>
+    <!-- ✅ ADSTERRA SIDEBAR 300x250 #1 -->
+    <div class="ad-sidebar">
+      <!-- ✅ Adsterra 300×250 code here -->
+      📢 Adsterra<br>300×250<br>Sidebar #1
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">🏆 WC 2026 — Group A</div>
+      <table class="standing-table">
+        <thead><tr><th>#</th><th>Team</th><th>P</th><th>Pts</th></tr></thead>
+        <tbody id="standings-body">
+          <tr><td class="pos">1</td><td class="team-n">🇦🇷 Argentina</td><td>3</td><td class="pts">9</td></tr>
+          <tr><td class="pos">2</td><td class="team-n">🇧🇷 Brazil</td><td>3</td><td class="pts">6</td></tr>
+          <tr><td class="pos">3</td><td class="team-n">🇺🇾 Uruguay</td><td>3</td><td class="pts">3</td></tr>
+          <tr><td class="pos">4</td><td class="team-n">🇨🇴 Colombia</td><td>3</td><td class="pts">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">⚽ Top Scorers</div>
+      <table class="standing-table">
+        <thead><tr><th>#</th><th>Player</th><th>G</th></tr></thead>
+        <tbody>
+          <tr><td class="pos">1</td><td class="team-n">Messi 🇦🇷</td><td class="pts">5</td></tr>
+          <tr><td class="pos">2</td><td class="team-n">Ronaldo 🇵🇹</td><td class="pts">4</td></tr>
+          <tr><td class="pos">3</td><td class="team-n">Mbappé 🇫🇷</td><td class="pts">4</td></tr>
+          <tr><td class="pos">4</td><td class="team-n">Vinicius 🇧🇷</td><td class="pts">3</td></tr>
+          <tr><td class="pos">5</td><td class="team-n">Kane 🏴󠁧󠁢󠁥󠁮󠁧󠁿</td><td class="pts">3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ✅ ADSTERRA SIDEBAR 300x250 #2 -->
+    <div class="ad-sidebar">
+      <!-- ✅ Adsterra 300×250 code here -->
+      📢 Adsterra<br>300×250<br>Sidebar #2
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">🗓 Next Matches</div>
+      <div id="sidebar-upcoming" style="font-size:.82rem;">
+        <div style="color:var(--muted);text-align:center;padding:10px;">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ ADSTERRA BOTTOM BANNER -->
+<div class="ad-slot" style="border-top:1px solid var(--border);border-bottom:none;">
+  <div class="ad-box" style="width:728px;max-width:100%;height:90px;">
+    <!-- ✅ Adsterra Bottom Banner 728×90 -->
+    📢 Adsterra Bottom Banner 728×90
+  </div>
+</div>
+
+<footer>
+  <div class="f-logo">GoalBD</div>
+  <p>The #1 Free Live Football Streaming Site — Real-time Data</p>
+  <div style="margin-top:12px;">
+    <a href="#">Home</a><a href="#live">Live</a><a href="#schedule">Schedule</a>
+    <a href="#news">News</a><a href="#">Contact</a>
+    <a href="#">Privacy Policy</a><a href="#">DMCA</a>
+  </div>
+  <p style="margin-top:14px;font-size:.72rem;">© 2026 GoalBD · Match data powered by football-data.org · This site shares publicly available stream links only.</p>
+</footer>
+
+<script>
+// ============================================================
+// ✅ STEP 1: PASTE YOUR FREE API KEY FROM football-data.org
+// Register free at: https://www.football-data.org/client/register
+// ============================================================
+const API_KEY = '4bf92b5a4a9047ce9ff85bcdf2ef907d';
+
+// ============================================================
+// CONFIG — leagues to fetch (all free tier)
+// ============================================================
+const COMPETITIONS = [
+  { code: 'WC',  name: 'FIFA World Cup',     emoji: '🏆' },
+  { code: 'PL',  name: 'Premier League',     emoji: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { code: 'PD',  name: 'La Liga',            emoji: '🇪🇸' },
+  { code: 'BL1', name: 'Bundesliga',         emoji: '🇩🇪' },
+  { code: 'SA',  name: 'Serie A',            emoji: '🇮🇹' },
+  { code: 'FL1', name: 'Ligue 1',            emoji: '🇫🇷' },
+  { code: 'CL',  name: 'Champions League',   emoji: '⭐' },
+];
+
+const BASE = 'https://api.football-data.org/v4';
+const WATCH_URL = '#watch'; // ← replace with your stream page URL
+
+// ============================================================
+// HELPERS
+// ============================================================
+function formatTime(utcStr) {
+  if (!utcStr) return '—';
+  const d = new Date(utcStr);
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dhaka' });
+}
+function formatDate(utcStr) {
+  if (!utcStr) return '';
+  const d = new Date(utcStr);
+  const today = new Date();
+  const tom = new Date(); tom.setDate(today.getDate()+1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === tom.toDateString()) return 'Tomorrow';
+  return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+}
+function isToday(utcStr) {
+  if (!utcStr) return false;
+  const d = new Date(utcStr);
+  const t = new Date();
+  return d.toDateString() === t.toDateString();
+}
+
+function statusInfo(match) {
+  const s = match.status;
+  if (s === 'IN_PLAY' || s === 'PAUSED') return { label: '🔴 LIVE', cls: 'live-now', dotCls: 'live', btnTxt: '▶ Watch', btnCls: 'watch-btn' };
+  if (s === 'FINISHED') return { label: '✅ FT', cls: 'finished', dotCls: '', btnTxt: 'FT', btnCls: 'watch-btn fin-btn' };
+  if (s === 'TIMED' || s === 'SCHEDULED') return { label: formatTime(match.utcDate), cls: '', dotCls: 'upcoming', btnTxt: 'Soon', btnCls: 'watch-btn soon-btn' };
+  return { label: s, cls: '', dotCls: '', btnTxt: 'Soon', btnCls: 'watch-btn soon-btn' };
+}
+
+function scoreStr(match) {
+  const sc = match.score;
+  if (!sc) return 'VS';
+  const h = sc.fullTime?.home, a = sc.fullTime?.away;
+  if (h !== null && h !== undefined) return `${h} – ${a}`;
+  return 'VS';
+}
+
+function compInfo(code) {
+  return COMPETITIONS.find(c => c.code === code) || { emoji: '⚽', name: code };
+}
+
+function renderCard(match) {
+  const comp = compInfo(match.competition?.code);
+  const info = statusInfo(match);
+  const score = scoreStr(match);
+  const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED';
+  const scoreClass = (match.status !== 'TIMED' && match.status !== 'SCHEDULED') ? 'score' : '';
+
+  const homeFlag = match.homeTeam?.flag || '';
+  const awayFlag = match.awayTeam?.flag || '';
+
+  return `
+  <a class="match-card ${info.cls}" href="${isLive ? WATCH_URL : (match.status==='TIMED'?'#':WATCH_URL)}" data-code="${match.competition?.code||'all'}">
+    <div class="match-league">${comp.emoji} ${comp.name}</div>
+    <div class="match-teams">
+      <div class="team-name">
+        ${homeFlag ? `<img class="team-crest" src="${homeFlag}" alt="" onerror="this.style.display='none'">` : ''}
+        ${match.homeTeam?.shortName || match.homeTeam?.name || '?'}
+      </div>
+      <div class="vs-box ${scoreClass}">${score}</div>
+      <div class="team-name">
+        ${awayFlag ? `<img class="team-crest" src="${awayFlag}" alt="" onerror="this.style.display='none'">` : ''}
+        ${match.awayTeam?.shortName || match.awayTeam?.name || '?'}
+      </div>
+    </div>
+    <div class="match-time-col">${info.label}</div>
+    <span class="${info.btnCls}">${info.btnTxt}</span>
+  </a>`;
+}
+
+function renderSkeletons(n=4) {
+  return Array(n).fill('<div class="skeleton"></div>').join('');
+}
+
+function renderEmpty(msg) {
+  return `<div style="color:var(--muted);text-align:center;padding:30px;font-size:.85rem;">
+    ${msg}</div>`;
+}
+
+function renderError() {
+  return `<div class="api-error">
+    ⚠️ Could not load match data.<br>
+    Make sure you've added your free API key from
+    <a href="https://www.football-data.org/client/register" target="_blank">football-data.org</a>
+  </div>`;
+}
+
+// ============================================================
+// FETCH ALL MATCHES (today + upcoming 7 days)
+// ============================================================
+let allMatches = [];
+let currentFilter = 'all';
+let currentTab = 'live';
+
+async function fetchMatches() {
+  if (API_KEY === 'YOUR_API_KEY_HERE') {
+    showDemoData();
+    return;
+  }
+
+  // Show skeletons
+  document.getElementById('matches-live').innerHTML = renderSkeletons(2);
+  document.getElementById('matches-today').innerHTML = renderSkeletons(4);
+  document.getElementById('setup-notice').style.display = 'none';
+
+  const today = new Date();
+  const future = new Date(); future.setDate(today.getDate()+7);
+  const dateFrom = today.toISOString().split('T')[0];
+  const dateTo = future.toISOString().split('T')[0];
+
+  try {
+    const res = await fetch(
+      `${BASE}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+      { headers: { 'X-Auth-Token': API_KEY } }
+    );
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    allMatches = data.matches || [];
+    renderAll();
+  } catch(e) {
+    console.error('API error', e);
+    document.getElementById('matches-live').innerHTML = renderError();
+    document.getElementById('matches-today').innerHTML = renderError();
+  }
+}
+
+function renderAll() {
+  const filtered = currentFilter === 'all'
+    ? allMatches
+    : allMatches.filter(m => m.competition?.code === currentFilter);
+
+  const live      = filtered.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
+  const today     = filtered.filter(m => isToday(m.utcDate) && m.status !== 'IN_PLAY' && m.status !== 'PAUSED' && m.status !== 'FINISHED');
+  const upcoming  = filtered.filter(m => !isToday(m.utcDate) && (m.status === 'TIMED' || m.status === 'SCHEDULED'));
+  const finished  = filtered.filter(m => m.status === 'FINISHED' && isToday(m.utcDate));
+
+  // Update counts
+  document.getElementById('live-count').textContent = live.length;
+  document.getElementById('today-count').textContent = today.length + live.length;
+  document.getElementById('live-tab-count').textContent = live.length;
+  document.getElementById('today-tab-count').textContent = today.length;
+
+  // Render live
+  document.getElementById('matches-live').innerHTML =
+    live.length ? live.map(renderCard).join('') : renderEmpty('No live matches right now. Check the Today tab.');
+
+  // Render today
+  document.getElementById('matches-today').innerHTML =
+    today.length ? today.map(renderCard).join('') : renderEmpty('No more matches scheduled for today.');
+
+  // Render upcoming (group by date)
+  if (upcoming.length) {
+    const grouped = {};
+    upcoming.forEach(m => {
+      const d = formatDate(m.utcDate);
+      if (!grouped[d]) grouped[d] = [];
+      grouped[d].push(m);
+    });
+    let html = '';
+    Object.entries(grouped).slice(0,3).forEach(([date, matches]) => {
+      html += `<div class="section-title" style="margin-top:14px;"><h2>${date}</h2><div class="line"></div></div>`;
+      html += matches.map(renderCard).join('');
+    });
+    document.getElementById('matches-upcoming').innerHTML = html;
+  } else {
+    document.getElementById('matches-upcoming').innerHTML = renderEmpty('No upcoming matches found.');
+  }
+
+  // Render finished
+  document.getElementById('matches-finished').innerHTML =
+    finished.length ? finished.map(renderCard).join('') : renderEmpty('No results yet for today.');
+
+  // Sidebar upcoming
+  const sideUpcoming = (allMatches.filter(m => !isToday(m.utcDate) && (m.status==='TIMED'||m.status==='SCHEDULED'))).slice(0,5);
+  if (sideUpcoming.length) {
+    document.getElementById('sidebar-upcoming').innerHTML = sideUpcoming.map(m => {
+      const comp = compInfo(m.competition?.code);
+      return `<div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;">
+        <span>${comp.emoji} ${m.homeTeam?.shortName||'?'} vs ${m.awayTeam?.shortName||'?'}</span>
+        <span style="color:var(--muted);white-space:nowrap;">${formatDate(m.utcDate)}</span>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('sidebar-upcoming').innerHTML = '<div style="color:var(--muted);text-align:center;padding:10px;font-size:.82rem;">No data</div>';
+  }
+}
+
+// ============================================================
+// DEMO DATA (shown when no API key yet)
+// ============================================================
+function showDemoData() {
+  const demoLive = [
+    { status:'IN_PLAY', competition:{code:'WC'}, homeTeam:{shortName:'Mexico',flag:''}, awayTeam:{shortName:'South Africa',flag:''}, score:{fullTime:{home:1,away:0}}, utcDate: new Date().toISOString() },
+    { status:'IN_PLAY', competition:{code:'PL'}, homeTeam:{shortName:'Man Utd',flag:''}, awayTeam:{shortName:'Man City',flag:''}, score:{fullTime:{home:2,away:1}}, utcDate: new Date().toISOString() },
+  ];
+  const demoToday = [
+    { status:'TIMED', competition:{code:'WC'}, homeTeam:{shortName:'England',flag:''}, awayTeam:{shortName:'France',flag:''}, score:{fullTime:{home:null,away:null}}, utcDate: new Date(Date.now()+3600000*3).toISOString() },
+    { status:'TIMED', competition:{code:'PD'}, homeTeam:{shortName:'Real Madrid',flag:''}, awayTeam:{shortName:'Barcelona',flag:''}, score:{fullTime:{home:null,away:null}}, utcDate: new Date(Date.now()+3600000*5).toISOString() },
+    { status:'TIMED', competition:{code:'CL'}, homeTeam:{shortName:'Juventus',flag:''}, awayTeam:{shortName:'Chelsea',flag:''}, score:{fullTime:{home:null,away:null}}, utcDate: new Date(Date.now()+3600000*6).toISOString() },
+  ];
+
+  allMatches = [...demoLive, ...demoToday,
+    { status:'TIMED', competition:{code:'BL1'}, homeTeam:{shortName:'Bayern',flag:''}, awayTeam:{shortName:'Dortmund',flag:''}, score:{fullTime:{home:null,away:null}}, utcDate: new Date(Date.now()+86400000).toISOString() },
+    { status:'TIMED', competition:{code:'SA'}, homeTeam:{shortName:'Milan',flag:''}, awayTeam:{shortName:'Inter',flag:''}, score:{fullTime:{home:null,away:null}}, utcDate: new Date(Date.now()+86400000*2).toISOString() },
+  ];
+  renderAll();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    currentTab = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['live','today','upcoming','finished'].forEach(t => {
+      document.getElementById('matches-'+t).style.display = t === currentTab ? 'block' : 'none';
+    });
+  });
+});
+
+// ============================================================
+// LEAGUE FILTER
+// ============================================================
+document.querySelectorAll('.league-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    currentFilter = chip.dataset.code;
+    document.querySelectorAll('.league-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    renderAll();
+  });
+});
+
+// ============================================================
+// INIT + AUTO-REFRESH every 60 seconds
+// ============================================================
+fetchMatches();
+setInterval(fetchMatches, 60000);
+</script>
+</body>
+</html>
