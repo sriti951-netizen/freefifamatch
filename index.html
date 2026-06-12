@@ -266,8 +266,8 @@
   <h1>Free <span>Live Football</span><br>Streams</h1>
   <p>Real-time FIFA World Cup 2026, Premier League, La Liga & Champions League — free, no sign-up needed.</p>
   <div class="hero-btns">
-    <a href="#live" class="btn-primary">🔴 Watch Live Now</a>
-    <a href="#schedule" class="btn-outline">📅 Full Schedule</a>
+    <a href="#live" class="btn-primary" onclick="document.getElementById('matches-live').scrollIntoView({behavior:'smooth'});window.open('https://www.effectivecpmnetwork.com/f7b859dvdb?key=140d0953ceb2c127c6e3b8c928504d3f','_blank');return false;">🔴 Watch Live Now</a>
+    <a href="#schedule" class="btn-outline" onclick="document.getElementById('matches-today').style.display='block';document.getElementById('matches-today').scrollIntoView({behavior:'smooth'});window.open('https://www.effectivecpmnetwork.com/f7b859dvdb?key=140d0953ceb2c127c6e3b8c928504d3f','_blank');return false;">📅 Full Schedule</a>
   </div>
 </div>
 
@@ -316,6 +316,7 @@
     </div>
 
     <!-- MATCH CONTAINERS -->
+    <div id="live"></div>
     <div id="matches-live"></div>
     <div id="matches-today" style="display:none;"></div>
     <div id="matches-upcoming" style="display:none;"></div>
@@ -330,35 +331,34 @@
       </div>
     </div>
 
+
     <!-- NEWS -->
     <div id="news" style="margin-top:10px;">
       <div class="section-title"><h2>📰 Latest News</h2><div class="line"></div></div>
-      <a class="news-item" href="#">
-        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c1/Argentina_national_football_team_logo.svg/100px-Argentina_national_football_team_logo.svg.png" alt="">
-        <div><div class="news-hl">Messi signals this could be his final World Cup — Argentina eye back-to-back glory</div><div class="news-meta">⏱ 2h ago · FIFA World Cup 2026</div></div>
-      </a>
-      <a class="news-item" href="#">
-        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8b/England_national_football_team_crest.svg/100px-England_national_football_team_crest.svg.png" alt="">
-        <div><div class="news-hl">England vs France: Tension builds ahead of the World Cup quarter-final showdown</div><div class="news-meta">⏱ 4h ago · FIFA World Cup 2026</div></div>
-      </a>
-      <a class="news-item" href="#">
-        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/3/39/Spain_national_football_team_crest.svg/100px-Spain_national_football_team_crest.svg.png" alt="">
-        <div><div class="news-hl">Spain dominant in group stage — are they the real favorites for the title?</div><div class="news-meta">⏱ 6h ago · La Liga</div></div>
-      </a>
-      <a class="news-item" href="#">
-        <img class="news-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Brazilian_Football_Confederation_logo.svg/100px-Brazilian_Football_Confederation_logo.svg.png" alt="">
-        <div><div class="news-hl">Brazil's Vinicius Jr in blistering form — samba football is back at the World Cup</div><div class="news-meta">⏱ 8h ago · FIFA World Cup 2026</div></div>
-      </a>
+      <div id="news-container">
+        <div class="skeleton" style="height:70px;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:70px;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:70px;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:70px;"></div>
+      </div>
     </div>
 
-  </div>
+
 
   <!-- SIDEBAR -->
   <div>
     <!-- ✅ ADSTERRA SIDEBAR 300x250 #1 -->
     <div class="ad-sidebar">
-<script async="async" data-cfasync="false" src="https://pl29721180.effectivecpmnetwork.com/d715a7945fd12af66dea369063af994d/invoke.js"></script>
-<div id="container-d715a7945fd12af66dea369063af994d"></div>
+<script>
+  atOptions = {
+    'key' : 'c462769ebe487a9feeec933130508b4e',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/c462769ebe487a9feeec933130508b4e/invoke.js"></script>
     </div>
 
     <div class="sidebar-card">
@@ -390,8 +390,16 @@
 
     <!-- ✅ ADSTERRA SIDEBAR 300x250 #2 -->
     <div class="ad-sidebar">
-<script async="async" data-cfasync="false" src="https://pl29721180.effectivecpmnetwork.com/d715a7945fd12af66dea369063af994d/invoke.js"></script>
-<div id="container-d715a7945fd12af66dea369063af994d-2"></div>
+<script>
+  atOptions = {
+    'key' : 'c462769ebe487a9feeec933130508b4e',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/c462769ebe487a9feeec933130508b4e/invoke.js"></script>
     </div>
 
     <div class="sidebar-card">
@@ -837,10 +845,81 @@ window.addEventListener('load', () => {
 });
 
 // ============================================================
+// NEWS API — GNews (free, no CORS issue)
+// Register free at: https://gnews.io → get API key
+// ============================================================
+const NEWS_API_KEY = '28bb4c6a007017e709cab00a333e3e31'; // ← gnews.io থেকে free key নাও
+
+async function fetchNews() {
+  const container = document.getElementById('news-container');
+  try {
+    // GNews API — football news
+    const res = await fetch(
+      `https://gnews.io/api/v4/search?q=football+soccer+FIFA&lang=en&max=6&apikey=${NEWS_API_KEY}`
+    );
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    const articles = data.articles || [];
+
+    if (!articles.length) throw new Error('No articles');
+
+    container.innerHTML = articles.map(a => {
+      const timeAgo = getTimeAgo(a.publishedAt);
+      const img = a.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Brazilian_Football_Confederation_logo.svg/100px-Brazilian_Football_Confederation_logo.svg.png';
+      return `
+        <a class="news-item" href="${a.url}" target="_blank" rel="noopener">
+          <img class="news-img" src="${img}" alt="" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/thumb/c/c1/Argentina_national_football_team_logo.svg/100px-Argentina_national_football_team_logo.svg.png'">
+          <div>
+            <div class="news-hl">${a.title}</div>
+            <div class="news-meta">⏱ ${timeAgo} · ${a.source?.name || 'Football News'}</div>
+          </div>
+        </a>`;
+    }).join('');
+
+  } catch(e) {
+    // Fallback: RSS via rss2json (no API key needed!)
+    try {
+      const rssRes = await fetch(
+        'https://api.rss2json.com/v1/api.json?rss_url=https://www.skysports.com/rss/12040'
+      );
+      const rssData = await rssRes.json();
+      const items = rssData.items?.slice(0, 6) || [];
+      if (!items.length) throw new Error('No RSS');
+      container.innerHTML = items.map(item => {
+        const timeAgo = getTimeAgo(item.pubDate);
+        return `
+          <a class="news-item" href="${item.link}" target="_blank" rel="noopener">
+            <img class="news-img" src="${item.thumbnail || item.enclosure?.link || ''}" alt=""
+              onerror="this.style.display='none'">
+            <div>
+              <div class="news-hl">${item.title}</div>
+              <div class="news-meta">⏱ ${timeAgo} · Sky Sports</div>
+            </div>
+          </a>`;
+      }).join('');
+    } catch(e2) {
+      container.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px;font-size:.85rem;">
+        News load করা যাচ্ছে না। <a href="https://gnews.io" target="_blank" style="color:var(--green)">gnews.io</a> থেকে free API key নিলে সব সময় কাজ করবে।
+      </div>`;
+    }
+  }
+}
+
+function getTimeAgo(dateStr) {
+  if (!dateStr) return '—';
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 60000);
+  if (diff < 60) return `${diff}m ago`;
+  if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
+  return `${Math.floor(diff/1440)}d ago`;
+}
+
+// ============================================================
 // INIT + AUTO-REFRESH every 60 seconds
 // ============================================================
 fetchMatches();
+fetchNews();
 setInterval(fetchMatches, 60000);
+setInterval(fetchNews, 300000); // news refresh every 5 min
 </script>
 </body>
 </html>
