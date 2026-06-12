@@ -357,9 +357,8 @@
   <div>
     <!-- ✅ ADSTERRA SIDEBAR 300x250 #1 -->
     <div class="ad-sidebar">
- <script async="async" data-cfasync="false" src="https://pl29721180.effectivecpmnetwork.com/d715a7945fd12af66dea369063af994d/invoke.js"></script>
-<div id="container-d715a7945fd12af66dea369063af994d">     </div>
-<br>300×250<br>Sidebar #1
+<script async="async" data-cfasync="false" src="https://pl29721180.effectivecpmnetwork.com/d715a7945fd12af66dea369063af994d/invoke.js"></script>
+<div id="container-d715a7945fd12af66dea369063af994d"></div>
     </div>
 
     <div class="sidebar-card">
@@ -392,8 +391,7 @@
     <!-- ✅ ADSTERRA SIDEBAR 300x250 #2 -->
     <div class="ad-sidebar">
 <script async="async" data-cfasync="false" src="https://pl29721180.effectivecpmnetwork.com/d715a7945fd12af66dea369063af994d/invoke.js"></script>
-<div id="container-d715a7945fd12af66dea369063af994d">      </div>
-<br>300×250<br>Sidebar #2
+<div id="container-d715a7945fd12af66dea369063af994d-2"></div>
     </div>
 
     <div class="sidebar-card">
@@ -408,16 +406,6 @@
 <!-- ✅ ADSTERRA BOTTOM BANNER -->
 <div class="ad-slot" style="border-top:1px solid var(--border);border-bottom:none;">
   <div class="ad-box" style="width:728px;max-width:100%;height:90px;">
-<script>
-  atOptions = {
-    'key' : '72e647fe7c72f0fcdccdc529df024a62',
-    'format' : 'iframe',
-    'height' : 90,
-    'width' : 728,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/72e647fe7c72f0fcdccdc529df024a62/invoke.js"></script>
 <script>
   atOptions = {
     'key' : '72e647fe7c72f0fcdccdc529df024a62',
@@ -479,7 +467,7 @@ const COMPETITIONS = [
 ];
 
 const BASE = 'https://api.football-data.org/v4';
-const WATCH_URL = 'https://www.effectivecpmnetwork.com/wkfyfft65?key=af7ca0200550acbf93508a28c578f8cd'; // ← replace with your stream page URL
+const WATCH_URL = 'https://www.effectivecpmnetwork.com/wkfyfft65?key=af7ca0200550acbf93508a28c578f8cd';
 
 // ============================================================
 // HELPERS
@@ -567,7 +555,7 @@ function renderCard(match) {
       </div>
     </div>
     <div class="match-time-col">${info.label}</div>
-    <a class="watch-btn ${info.btnCls}" href="${isLive ? WATCH_URL : (match.status==='TIMED'?'#':WATCH_URL)}">${info.btnTxt}</a>
+    <a class="watch-btn ${info.btnCls}" href="${isLive ? WATCH_URL : (match.status==='TIMED'?'#':WATCH_URL)}" target="_blank" rel="noopener">${info.btnTxt}</a>
     ${scorers ? `<div class="card-bottom" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;width:100%;">${scorers}</div>` : ''}
     ${hasComm ? `
     <div class="card-bottom">
